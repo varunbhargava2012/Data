@@ -74,4 +74,36 @@ plot(fitted(mod_t), resid(mod_t), pch=16)
 plot(fitted(mod_t), rstudent(mod_t), pch=16)
 Pred_R_Sq_t <- 1-((press(mod_t)/sum(anova(mod_t)$'Sum Sq')))
 
+#leverage points hii>2p/n
+data_t$hii=hatvalues(mod_t)
+data_t[data_t$hii>(18/length(data_t$company1)),]
+#filter(data_t,hii>18/950)
 
+#influential points with cooks-d >1
+data_t$cooks=cooks.distance(mod_t)
+data_t[data_t$cooks>1,]
+
+#DF-Betas
+data_t$DFB=dfbetas(mod_t)
+data_t[abs(data_t$DFB) > (2/sqrt(950)),]
+
+#DF-Fits 2sqrt(p/n)
+data_t$DFF=dffits(mod_t)
+data_t[abs(data_t$DFF) > (2*sqrt(9/950)),]
+
+#COV ratio >1
+data_t$COV=covratio(mod_t)
+data_t[data_t$COV>1,]
+
+
+library(ridge)
+
+#ridge reression gives the same beta's as lm. so multicollinearuty is not a problem.Going frwrd with normal model
+mod_r<-linearRidge(company10~company1+company2+company4+company5+company6+company7+company8+company9,data=data_t,lambda="automatic")
+summary(mod_r)
+VIF(mod_r)
+plot(mod_r)
+y_pred=predict(mod_r,newdata = data_t)
+
+step = stepAIC(mod_t, direction="both")
+summary(step)
