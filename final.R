@@ -1,4 +1,3 @@
-setwd('C:/Users/Varun/Desktop/Udemy')
 library(dplyr)
 library(foreign)
 library(car)
@@ -8,10 +7,13 @@ library(DAAG)
 library(fmsb)
 library(plyr)
 library(MASS)
+library(ridge)
+library(perturb)
+library(leaps)
+setwd('C:/Users/Varun/Desktop/Udemy')
 data = read.arff('dataset_2209_stock.arff')
-head(data, 5)
 summary(data)
-plot(data[, c(1:10)], pch=16, col='brown')
+#plot(data[, c(1:10)], pch=16, col='brown')
 #mod 0
 mod0 <- lm(company10~., data=data)
 summary(mod0)
@@ -95,15 +97,28 @@ data_t[abs(data_t$DFF) > (2*sqrt(9/950)),]
 data_t$COV=covratio(mod_t)
 data_t[data_t$COV>1,]
 
-
-library(ridge)
-
 #ridge reression gives the same beta's as lm. so multicollinearuty is not a problem.Going frwrd with normal model
 mod_r<-linearRidge(company10~company1+company2+company4+company5+company6+company7+company8+company9,data=data_t,lambda="automatic")
 summary(mod_r)
 VIF(mod_r)
 plot(mod_r)
 y_pred=predict(mod_r,newdata = data_t)
+data_t$res=data_t$company10-y_pred
+data_t$pred=y_pred
+MSE_r <- mean(data_t$res^2)
 
-step = stepAIC(mod_t, direction="both")
-summary(step)
+# step = stepAIC(mod_t, direction="both")
+# summary(step)
+# plot(step)
+
+#backward and forward selection STEP
+null=lm(company10~1,data=data_t)
+full=lm(company10~company1+company2+company3+company4+company5+company6+company7+company8+company9,data=data_t)
+step(null, scope=list(lower=null, upper=full), direction="forward")
+step(full, direction="backward")
+step(null, scope = list(upper=full), direction="both")
+
+
+plot(data_t$company1, data_t$company2, pch=16)
+corrplot(cor(data[1:10]),method='number')
+
