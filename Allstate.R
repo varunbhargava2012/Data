@@ -468,25 +468,19 @@ fixplans <- function(planpurmax, plancntmin, commonmin) {
   return(testsub)
 }
 
-# submission that had my best PUBLIC leaderboard score
-# 5 plans, 322 fixes
-# public score: 0.53853, above baseline by 10 picks
-# private score: 0.53266, below baseline by 1 pick
+
 ts <- fixplans(0.05, 70, 0.05)
 pred <- data.frame(customer_ID = ts$customer_ID, plan = ts$planpred)
 write.csv(pred, file="submit34.csv", row.names=FALSE, quote=FALSE)
 
-# submission that had my best PRIVATE leaderboard score
-# 2 plans, 305 fixes
-# public score: 0.53847, above baseline by 9 picks
-# private score: 0.53277, above baseline by 3 picks
+
 ts <- fixplans(0.05, 500, 0.05)
 pred <- data.frame(customer_ID = ts$customer_ID, plan = ts$planpred)
 write.csv(pred, file="submit25.csv", row.names=FALSE, quote=FALSE)
 
 # PART 11:
 
-# predict change (for 12403 people, 100+ plans, 98 fixes)
+
 glm.fit <- glm(changed ~ state+cost+A+C+D+E+F+G+age_oldest+age_youngest+
                  car_value+car_age+shopping_pt+timeofday+weekend+risk_factor+C_previous+
                  duration_previous+stability+planfreq, data=trainex2, family=binomial)
@@ -499,6 +493,6 @@ nrow(ts[ts$planpred!=ts$plan & ts$changed=="Yes", ])
 ts$planpred <- ifelse(ts$changed=="No", ts$plan, ts$planpred)
 nrow(ts[ts$planpred!=ts$plan,])
 
-# submit: 0.53787, 1 below baseline
+
 pred <- data.frame(customer_ID = ts$customer_ID, plan = ts$planpred)
 write.csv(pred, file="submit24.csv", row.names=FALSE, quote=FALSE)
